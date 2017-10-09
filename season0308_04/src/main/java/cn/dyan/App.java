@@ -25,6 +25,7 @@ public class App {
         user.setUname("TestTx1009");
         user.setUuid(UUID.randomUUID().toString());
         userService.saveUser(user);
+//        userService.createUser(user);
 
         SpringApplication.exit(context);
     }
