@@ -69,7 +69,6 @@ public class OrderService {
     public void payOrders(){
         List<Order> orders = selectAll();
         callTotal(orders);
-
         TransactionTemplate transactionTemplate = new TransactionTemplate(this.txManager);
         transactionTemplate.execute((status) -> {
             updateOrderStatus(orders);
