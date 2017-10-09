@@ -9,8 +9,12 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -19,6 +23,10 @@ public class OrderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
     @Autowired
     private OrderMapper orderMapper;
+
+
+    @Autowired
+    private PlatformTransactionManager txManager;
 
     @Autowired
     private LogService logService;
@@ -36,7 +44,7 @@ public class OrderService {
         emailService.sendEmail(order.getSeller(),"You have a new order!");
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
 //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public List<Order> selectAll(){
         return orderMapper.selectAll();
@@ -48,7 +56,7 @@ public class OrderService {
     }
 
 
-    @Transactional
+//    @Transactional
     private void updateOrderStatus(List<Order> orders){
         orders.stream().forEach(order -> {
             order.setStatus(1);
@@ -57,11 +65,20 @@ public class OrderService {
     }
 
 
-    @Transactional
+//    @Transactional
     public void payOrders(){
         List<Order> orders = selectAll();
         callTotal(orders);
-        updateOrderStatus(orders);
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(this.txManager);
+        transactionTemplate.execute(new TransactionCallback<Object>() {
+            @Override
+            public Object doInTransaction(TransactionStatus status) {
+                updateOrderStatus(orders);
+                return null;
+            }
+        });
+
     }
 
 
