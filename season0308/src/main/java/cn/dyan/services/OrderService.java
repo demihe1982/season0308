@@ -71,12 +71,9 @@ public class OrderService {
         callTotal(orders);
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(this.txManager);
-        transactionTemplate.execute(new TransactionCallback<Object>() {
-            @Override
-            public Object doInTransaction(TransactionStatus status) {
-                updateOrderStatus(orders);
-                return null;
-            }
+        transactionTemplate.execute((status) -> {
+            updateOrderStatus(orders);
+            return null;
         });
 
     }
