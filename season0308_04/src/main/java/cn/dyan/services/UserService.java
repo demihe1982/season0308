@@ -13,7 +13,11 @@ public class UserService {
     @Autowired
     private TbUserMapper userMapper;
 
-    public List<TbUser> queryAll(){
+    public List<TbUser> getAll(){
         return  userMapper.selectAll();
+    }
+
+    public int saveUser(TbUser user){
+        return userMapper.insert(user);
     }
 }
